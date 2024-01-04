@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:audioplayers/audioplayers.dart';
 import "package:cached_network_image/cached_network_image.dart";
+import 'package:logger/logger.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,11 +10,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'chat bubble example',
+      title: 'Cpeso Merchant Chat',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'chat bubble example'),
+      debugShowCheckedModeBanner: false,
+      home: MyHomePage(title: 'Cpeso Merchant Chat'),
     );
   }
 }
@@ -36,7 +38,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final Logger _logger = Logger(); // Create a logger instance
     final now = new DateTime.now();
+    ScrollController _scrollController = ScrollController();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -44,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: [
           SingleChildScrollView(
+            controller: _scrollController,
             child: Column(
               children: <Widget>[
                 BubbleNormalImage(
@@ -200,7 +206,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           MessageBar(
-            onSend: (_) => print(_),
+            onSend: (msg) {
+              _logger.d(msg);
+              // Vertual keyboad hiding
+              FocusManager.instance.primaryFocus?.unfocus();
+
+              /// Scroll maximum end, if you want you can give hardcoded values also in place of _scrollController.position.maxScrollExtent
+              _scrollController.animateTo(
+                  _scrollController.position.maxScrollExtent,
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.ease);
+            },
             actions: [
               InkWell(
                 child: Icon(
@@ -208,7 +224,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.black,
                   size: 24,
                 ),
-                onTap: () {},
+                onTap: () {
+                  _logger.d('attach a file');
+                },
               ),
               Padding(
                 padding: EdgeInsets.only(left: 8, right: 8),
@@ -218,7 +236,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.green,
                     size: 24,
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    _logger.d('take a picture');
+                  },
                 ),
               ),
             ],
@@ -252,7 +272,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _playAudio() async {
     final url =
-        'https://file-examples.com/storage/fef1706276640fa2f99a5a4/2017/11/file_example_MP3_700KB.mp3';
+        //'https://file-examples.com/storage/fef1706276640fa2f99a5a4/2017/11/file_example_MP3_700KB.mp3';
+        'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/blocSonic/Flex_Vector/Born_Ready/Flex_Vector_-_Born_Ready.mp3';
     if (isPause) {
       await audioPlayer.resume();
       setState(() {
